@@ -78,6 +78,14 @@ router.post('/signup', (req, res, next) => {
 
     router.get('/profile', (req, res) => {
         res.send({ userInSession: req.session.currentUser })
-    })
+    });
+
+    router.post('/logout', (req, res, next) => {
+        req.session.destroy(err => {
+            if(err) next (err);
+            // res.redirect('/')
+            res.send('User is loggged out')
+        });
+    });
       
 module.exports = router;

@@ -35,4 +35,11 @@ module.exports = (app) => {
   app.use(express.json());
   app.use(express.urlencoded({ extended: false }));
   app.use(cookieParser());
+
+// Th handle errors
+  app.use((err, req, res, next) => {
+    console.error('Error:', err);
+    res.status(err.status || 500).json({ error: err.message || 'Internal Server Error' });
+});
 };
+

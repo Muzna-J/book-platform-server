@@ -3,6 +3,7 @@ require("./db");
 const express = require("express");
 const app = express();
 require("./config")(app);
+require('./config/session.config')(app); //the app getting passed here is the express app defined above
 
 // 👇 Start handling routes here
 const indexRoutes = require("./routes/index.routes");

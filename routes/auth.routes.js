@@ -52,6 +52,7 @@ router.post('/signup', (req, res, next) => {
     router.get('/login', (req, res) => res.send('Please provide your login credentials'));
 
     router.post('/login', (req, res, next) => {
+        console.log('SESSION =====> ', req.session)
         const { email, password } = req.body;
 
         if(email === '' || password === '') {
@@ -65,7 +66,8 @@ router.post('/signup', (req, res, next) => {
                 res.send({errorMessage: 'Email is not registered. Try with another email.'});
                 return;
             } else if(bcryptjs.compareSync(password, user.passwordHash)) {
-                res.send('login successful').redirect('/profile')
+                req.session.currentUser = user;
+                res.redirect('/profile') // to-do - json message send('login successful')
             } else {
                 res.send({errorMessage: 'Incorrect password'})
             }
@@ -73,5 +75,9 @@ router.post('/signup', (req, res, next) => {
         .catch(error => next(error))
 
     });
+
+    router.get('/profile', (req, res) => {
+        res.send({ userInSession: req.session.currentUser })
+    })
       
 module.exports = router;

@@ -5,10 +5,11 @@ const User = require('../models/User.model')
 const router = new Router();
 const { passwordValidator } = require('../utils');
 const mongoose = require('mongoose');
+const { isLoggedIn, isLoggedOut } = require('../middleware/route-guard');
 
-router.get('/signup', (req, res)=> res.send('please provide email and password'));
+router.get('/signup', isLoggedOut, (req, res)=> res.send('please provide email and password'));
 
-router.post('/signup', (req, res, next) => {
+router.post('/signup', isLoggedOut, (req, res, next) => {
     
     //console.log(req.body)
     const { email, password } = req.body;
@@ -49,9 +50,9 @@ router.post('/signup', (req, res, next) => {
 
     });
 
-    router.get('/login', (req, res) => res.send('Please provide your login credentials'));
+    router.get('/login', isLoggedOut, (req, res) => res.send('Please provide your login credentials'));
 
-    router.post('/login', (req, res, next) => {
+    router.post('/login', isLoggedOut, (req, res, next) => {
         console.log('SESSION =====> ', req.session)
         const { email, password } = req.body;
 
@@ -76,11 +77,11 @@ router.post('/signup', (req, res, next) => {
 
     });
 
-    router.get('/profile', (req, res) => {
+    router.get('/profile', isLoggedIn, (req, res) => {
         res.send({ userInSession: req.session.currentUser })
     });
 
-    router.post('/logout', (req, res, next) => {
+    router.post('/logout', isLoggedIn, (req, res, next) => {
         req.session.destroy(err => {
             if(err) next (err);
             // res.redirect('/')

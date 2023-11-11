@@ -1,28 +1,74 @@
 const router = require("express").Router();
-const { getBookDetails, searchByAuthor } = require('../api/googleBooksAPI');
+const User = require('../models/User.model');
+const Book = require('../models/Book.model');
+const Review = require('../models/Review.model');
+
+
 
 router.get("/", (req, res, next) => {
   res.json("All good in here");
 });
 
-router.get('/bookdetails/:bibkeys', async(req, res, next) => {
+router.get('/reading-list', async(req, res) => {
   try {
-    const bookDetails = await getBookDetails(req.params.bibkeys);
-    res.json(bookDetails);
+    const user = await User.findById(req.user._id).populate('readingList');
+    res.json(user.readingList);
   } catch (error) {
-    next(error);
+    res.status(500).send('internal server error')
 
   }
 });
 
-router.get('/authors/:olid', async(req, res, next) => {
+router.post('/add-book', async(req, res) => {
   try {
-    const authorWork = await searchByAuthor(req.params.olid);
-    res.json(authorWork);
+    const { bookId, title, thumbnail } = req.body;
+    let book = await Book.findOne({ bookId });
+    if(!book) {
+      book = await Book.create({ bookId, title, thumbnail })
+    }
+
+    await User.findByIdAndUpdate(req.user._id, {
+      $addToSet: { readingList: book._id}
+    });
+    res.send('Book added to reading list')
   } catch (error) {
-    next(error);
+    res.status(500).send('internal server error')
   }
 });
+
+router.post('/delete-book', async (req, res) => {
+  try {
+    const { bookId } = req.body;
+    const book = await Book.findOne({ bookId });
+    await User.findByIdAndUpdate(req.user._id, {
+      $pull: { readingList: book._id }
+    });
+    res.send('Book removed from reading list')
+  } catch (error) {
+    res.status(500).send('internal server error');
+  }
+});
+
+router.post('/books/:bookId/reviews', async (req, res) => {
+  try {
+    const { rating, comment } = req.body;
+    const bookId = req.params.bookId;
+    const userId = req.user._id;
+
+    const review = new Review({
+      book: bookId,
+      user: userId,
+      rating,
+      comment
+    });
+    await review.save();
+    res.status(200).json(review);
+    
+  } catch (error) {
+    res.status(500).json({message: error.message})
+  }
+});
+
 
 
 module.exports = router;

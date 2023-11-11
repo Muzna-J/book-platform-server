@@ -1,26 +1,10 @@
-const { Schema, model } = require('mongoose');
+const mongoose = require('mongoose');
 
-const bookSchema = new Schema ( {
-    openLibraryId: {
-        type: String,
-        required: true,
-        unique: true
-    },
+const bookSchema = new mongoose.Schema({
+    bookId: String, // from Google Books
+    title: String,
+    thumbnail: String
+});
 
-    title: {
-        type: String,
-        required: true
-
-    },
-
-    author: {
-        type: String,
-        required: true
-    },
-
-    coverImageUrl: {
-        type: String,
-        required: true
-    }
-}
-)
+const Book = mongoose.model('Book', bookSchema);
+module.exports = Book;

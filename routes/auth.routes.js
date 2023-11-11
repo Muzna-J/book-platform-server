@@ -6,6 +6,7 @@ const router = new Router();
 const { passwordValidator } = require('../utils');
 const mongoose = require('mongoose');
 const { isLoggedIn, isLoggedOut } = require('../middleware/route-guard');
+const Book = require('../models/Book.model');
 
 router.get('/signup', isLoggedOut, (req, res)=> res.send('please provide email and password'));
 

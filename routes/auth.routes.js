@@ -12,7 +12,6 @@ router.get('/signup', isLoggedOut, (req, res)=> res.send('please provide email a
 
 router.post('/signup', isLoggedOut, (req, res, next) => {
     
-    //console.log(req.body)
     const { email, password } = req.body;
 
     if(!email || !password) {
@@ -54,7 +53,6 @@ router.post('/signup', isLoggedOut, (req, res, next) => {
     router.get('/login', isLoggedOut, (req, res) => res.send('Please provide your login credentials'));
 
     router.post('/login', isLoggedOut, (req, res, next) => {
-        console.log('SESSION =====> ', req.session)
         const { email, password } = req.body;
 
         if(email === '' || password === '') {

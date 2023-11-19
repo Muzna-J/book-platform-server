@@ -14,12 +14,13 @@ async function getBooks(query) {
         })
 
         if(response.data.items) {
+             
             response.data.items.forEach(book => {
                 const title = book.volumeInfo.title;
                 const author = book.volumeInfo.authors
                 const coverImage = book.volumeInfo.imageLinks?.thumbnail;
-                console.log(title, author, coverImage)
-                books.push({title, author, coverImage});
+                const volumeId = book.id;
+                books.push({title, author, coverImage, volumeId});
             })
         } 
         return books;

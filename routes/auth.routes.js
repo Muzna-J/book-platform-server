@@ -67,7 +67,7 @@ router.post('/signup', isLoggedOut, (req, res, next) => {
                 return;
             } else if(bcryptjs.compareSync(password, user.passwordHash)) {
                 req.session.currentUser = user;
-                res.redirect('/profile') // to-do - json message send('login successful')
+                res.status(200).json({ message: 'Login successful' }); // to-do - json message send('login successful')
             } else {
                 res.send({errorMessage: 'Incorrect password'})
             }

@@ -14,12 +14,12 @@ router.get('/reading-list', async(req, res) => {
     const user = await User.findById(req.user._id).populate('readingList');
     res.json(user.readingList);
   } catch (error) {
-    res.status(500).send('internal server error')
+    res.status(500).json({ message: 'Internal server error' });
 
   }
 });
 
-router.post('/add-book', async(req, res) => {
+router.post('/reading-list/add', async(req, res) => {
   try {
     const { bookId, title, thumbnail } = req.body;
     let book = await Book.findOne({ bookId });
@@ -30,9 +30,9 @@ router.post('/add-book', async(req, res) => {
     await User.findByIdAndUpdate(req.user._id, {
       $addToSet: { readingList: book._id}
     });
-    res.send('Book added to reading list')
+    res.json({ message: 'Book added to reading list' });
   } catch (error) {
-    res.status(500).send('internal server error')
+    res.status(500).json({ message: 'Internal server error', error: process.env.NODE_ENV === 'development' ? error : undefined });
   }
 });
 

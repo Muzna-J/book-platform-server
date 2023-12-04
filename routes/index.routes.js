@@ -9,7 +9,7 @@ router.get("/", (req, res, next) => {
   res.json("All good in here");
 });
 
-router.get('/reading-list', async(req, res) => {
+router.get('/reading-list', isLoggedIn, async(req, res) => {
   try {
     const user = await User.findById(req.session.currentUser._id).populate('readingList');
     res.json(user.readingList);
@@ -21,16 +21,15 @@ router.get('/reading-list', async(req, res) => {
 
 router.post('/reading-list/add', isLoggedIn, async(req, res) => {
   try {
-    const { volumeId } = req.body;
+    const { volumeId, title , thumbnail } = req.body;
     if (!req.session.currentUser) {
       return res.status(401).json({ message: 'Not authenticated' });
     }
   
     // First, create a new Book document or find an existing one
-    let book = await Book.findOne({ _id: volumeId });
+    let book = await Book.findOne({ volumeId });
     if (!book) {
-      const { title, thumbnail } = req.body;
-      book = new Book({ _id: volumeId, title, thumbnail });
+      book = new Book({ volumeId, title, thumbnail });
       await book.save();
     }
 
@@ -39,7 +38,7 @@ router.post('/reading-list/add', isLoggedIn, async(req, res) => {
       $addToSet: { readingList: book._id }
     });
 
-    res.json({ message: 'Book added to reading list' });
+    res.json({ book });
   } catch (error) {
     res.status(500).json({ message: 'Internal server error', error: process.env.NODE_ENV === 'development' ? error : undefined });
   }

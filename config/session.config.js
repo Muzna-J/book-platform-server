@@ -1,9 +1,9 @@
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
-const mongoose = require('mongoose');
+
 
 module.exports = app => {
-    app.set('trust proxy', 1)
+    //app.set('trust proxy', 1)
 
     app.use(
         session({
@@ -12,12 +12,12 @@ module.exports = app => {
             saveUninitialized: false,
             cookie: {
                 sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-                secure: process.env.NODE_ENV === 'production',
+                secure: false,
                 httpOnly: true,
-                maxAge: 60000
+                maxAge: 3600000
             },
             store: MongoStore.create({
-                mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost/server'
+                mongoUrl: process.env.MONGODB_URI 
             })
         })
     )

@@ -8,13 +8,17 @@ const mongoose = require('mongoose');
 const { isLoggedIn, isLoggedOut } = require('../middleware/route-guard');
 const Book = require('../models/Book.model');
 
+
+const allRoutes = require('./auth.routes');
+
+
 router.get('/signup', isLoggedOut, (req, res)=> res.send('please provide email and password'));
 
 router.post('/signup', isLoggedOut, (req, res, next) => {
     
-    const { email, password } = req.body;
+    const { name, email, password } = req.body;
 
-    if(!email || !password) {
+    if(!name || !email || !password) {
         res.send({errorMessage: 'All fields are mandatory. Please provide your email and password'})
     }
 
@@ -30,6 +34,7 @@ router.post('/signup', isLoggedOut, (req, res, next) => {
     .then(salt => bcryptjs.hash(password, salt))
     .then(hashedPassword => {
       return User.create({
+            name,
             email, 
             passwordHash: hashedPassword
         });
@@ -38,6 +43,7 @@ router.post('/signup', isLoggedOut, (req, res, next) => {
         console.log('Newly created user is: ', userFromDB);
         res.status(201).json({message: 'User registered successfully', user: userFromDB})
         res.redirect('/profile')
+        
       })
       .catch(error => {
         if(error instanceof mongoose.Error.ValidationError) {
@@ -67,7 +73,7 @@ router.post('/signup', isLoggedOut, (req, res, next) => {
                 return;
             } else if(bcryptjs.compareSync(password, user.passwordHash)) {
                 req.session.currentUser = user;
-                res.status(200).json({ message: 'Login successful' }); // to-do - json message send('login successful')
+                res.status(200).json({ message: 'Login successful' }); 
             } else {
                 res.send({errorMessage: 'Incorrect password'})
             }
@@ -83,7 +89,6 @@ router.post('/signup', isLoggedOut, (req, res, next) => {
     router.post('/logout', isLoggedIn, (req, res, next) => {
         req.session.destroy(err => {
             if(err) next (err);
-            // res.redirect('/')
             res.send('User is loggged out')
         });
     });

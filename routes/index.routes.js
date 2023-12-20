@@ -62,18 +62,20 @@ router.post('/reading-list/add', isLoggedIn, async(req, res) => {
 //   }
 // });
 
-// router.post('/delete-book', async (req, res) => {
-//   try {
-//     const { bookId } = req.body;
-//     const book = await Book.findOne({ bookId });
-//     await User.findByIdAndUpdate(req.user._id, {
-//       $pull: { readingList: book._id }
-//     });
-//     res.send('Book removed from reading list')
-//   } catch (error) {
-//     res.status(500).send('internal server error');
-//   }
-// });
+router.post('/delete-book', isLoggedIn, async (req, res) => {
+  console.log("Delete request received:", req.body);
+  try {
+    const { volumeId, title , thumbnail } = req.body;
+    const book = await Book.findOne({ volumeId });
+    await User.findByIdAndUpdate(req.session.currentUser._id, {
+      $pull: { readingList: book._id }
+    });
+    res.send('Book removed from reading list')
+  } catch (error) {
+    console.log(error);
+    res.status(500).send('internal server error', error);
+  }
+});
 
 // router.post('/books/:bookId/reviews', async (req, res) => {
 //   try {

@@ -65,10 +65,10 @@ router.post('/reading-list/add', isLoggedIn, async(req, res) => {
 router.post('/delete-book', isLoggedIn, async (req, res) => {
   console.log("Delete request received:", req.body);
   try {
-    const { volumeId, title , thumbnail } = req.body;
+    const { _id } = req.body;
     const book = await Book.findOne({ volumeId });
     await User.findByIdAndUpdate(req.session.currentUser._id, {
-      $pull: { readingList: book._id }
+      $pull: { readingList:  _id }
     });
     res.send('Book removed from reading list')
   } catch (error) {

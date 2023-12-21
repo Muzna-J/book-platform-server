@@ -62,14 +62,14 @@ router.post('/reading-list/add', isLoggedIn, async(req, res) => {
 //   }
 // });
 
-<<<<<<< HEAD
+
 router.post('/delete-book', isLoggedIn, async (req, res) => {
   console.log("Delete request received:", req.body);
   try {
-    const { _id } = req.body;
+    const { volumeId } = req.body;
     const book = await Book.findOne({ volumeId });
     await User.findByIdAndUpdate(req.session.currentUser._id, {
-      $pull: { readingList:  _id }
+      $pull: { readingList:  book._id }
     });
     res.send('Book removed from reading list')
   } catch (error) {
@@ -77,7 +77,7 @@ router.post('/delete-book', isLoggedIn, async (req, res) => {
     res.status(500).send('internal server error', error);
   }
 });
-=======
+
 // router.post('/delete-book', async (req, res) => {
 //   try {
 //     const { bookId } = req.body;
@@ -90,7 +90,7 @@ router.post('/delete-book', isLoggedIn, async (req, res) => {
 //     res.status(500).send('internal server error');
 //   }
 // });
->>>>>>> parent of 639782f (delete book using volumeId)
+
 
 // router.post('/books/:bookId/reviews', async (req, res) => {
 //   try {

@@ -78,39 +78,32 @@ router.post('/delete-book', isLoggedIn, async (req, res) => {
   }
 });
 
-// router.post('/delete-book', async (req, res) => {
-//   try {
-//     const { bookId } = req.body;
-//     const book = await Book.findOne({ bookId });
-//     await User.findByIdAndUpdate(req.user._id, {
-//       $pull: { readingList: book._id }
-//     });
-//     res.send('Book removed from reading list')
-//   } catch (error) {
-//     res.status(500).send('internal server error');
-//   }
-// });
 
+router.post('/add-review', isLoggedIn, async (req, res) => {
+  console.log("Review submission received:", req.body);
+  try {
+    const { rating, comment, volumeId } = req.body;
+    const book = await Book.findOne({ volumeId });
+    const userId = req.session.currentUser._id;
 
-// router.post('/books/:bookId/reviews', async (req, res) => {
-//   try {
-//     const { rating, comment } = req.body;
-//     const bookId = req.params.bookId;
-//     const userId = req.user._id;
+    if (!book) {
+      return res.status(404).send('Book not found');
+    }
 
-//     const review = new Review({
-//       book: bookId,
-//       user: userId,
-//       rating,
-//       comment
-//     });
-//     await review.save();
-//     res.status(200).json(review);
+    const review = new Review({
+      book: book._id,
+      user: userId,
+      rating,
+      comment
+    });
+    await review.save();
+    res.status(200).json(review);
     
-//   } catch (error) {
-//     res.status(500).json({message: error.message})
-//   }
-// });
+  } catch (error) {
+    console.log(error)
+    res.status(500).send('internal server error', error)
+  }
+});
 
 
 

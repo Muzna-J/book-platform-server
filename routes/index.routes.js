@@ -84,7 +84,7 @@ router.post('/add-review', isLoggedIn, async (req, res) => {
   try {
     const { rating, comment, volumeId } = req.body;
     const book = await Book.findOne({ volumeId });
-    const userId = req.session.currentUser._id;
+    //const userId = req.session.currentUser._id;
 
     if (!book) {
       return res.status(404).send('Book not found');
@@ -92,11 +92,14 @@ router.post('/add-review', isLoggedIn, async (req, res) => {
 
     const review = new Review({
       book: book._id,
-      user: userId,
+      user: req.session.currentUser._id,
       rating,
       comment
     });
     await review.save();
+
+    book.reviews.push(review._id); //update the book with the new review
+    await book.save();
     res.status(200).json(review);
     
   } catch (error) {
@@ -104,6 +107,26 @@ router.post('/add-review', isLoggedIn, async (req, res) => {
     res.status(500).send('internal server error', error)
   }
 });
+
+
+router.get('/get-reviews/:volumeId', isLoggedIn, async (req, res) => {
+  try {
+    const { volumeId } = req.params;
+    const book = await Book.findOne({volumeId}).populate('reviews');
+    if(!book) {
+      return res.status(404).send('Book not found')
+    }
+
+    if (book.reviews.length === 0) {
+      return res.status(200).json({ message: "No reviews yet." });
+    }
+
+    
+    res.json(book.reviews);
+  } catch (error) {
+    res.status(500).send('internal server error', error)
+  }
+})
 
 
 

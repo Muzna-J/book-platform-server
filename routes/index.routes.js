@@ -112,7 +112,10 @@ router.post('/add-review', isLoggedIn, async (req, res) => {
 router.get('/get-reviews/:volumeId', isLoggedIn, async (req, res) => {
   try {
     const { volumeId } = req.params;
-    const book = await Book.findOne({volumeId}).populate('reviews');
+    const book = await Book.findOne({ volumeId }).populate({
+      path: 'reviews',
+      populate: { path: 'user' } // Populate user data in each review
+  });
     if(!book) {
       return res.status(404).send('Book not found')
     }
@@ -121,12 +124,68 @@ router.get('/get-reviews/:volumeId', isLoggedIn, async (req, res) => {
       return res.status(200).json({ message: "No reviews yet." });
     }
 
-    
+
     res.json(book.reviews);
   } catch (error) {
     res.status(500).send('internal server error', error)
   }
-})
+});
+
+router.delete('/delete-review/:reviewId', isLoggedIn, async (req, res) => {
+  try {
+    const { reviewId } = req.params;
+    const review = await Review.findById(reviewId);
+
+    if (!review) {
+      return res.status(404).send('Review not found');
+    }
+
+    // Check if the current user is the one who posted the review
+    if (req.session.currentUser._id !== review.user.toString()) { // converting the objectId in Mongo to a string to compare with the _id of the session which is a string
+      return res.status(403).send('You are not authorized to delete this review');
+    }
+
+    await Review.findByIdAndRemove(reviewId);
+
+    // Also, remove the review reference from the book
+    const book = await Book.findById(review.book);
+    book.reviews.pull(reviewId);
+    await book.save();
+
+    res.status(200).send('Review deleted successfully');
+  } catch (error) {
+    console.log(error);
+    res.status(500).send('Internal server error');
+  }
+});
+
+
+router.put('/edit-review/:reviewId', isLoggedIn, async (req, res) => {
+  try {
+    const { reviewId } = req.params;
+    const { rating, comment } = req.body;
+    const review = await Review.findById(reviewId);
+
+    if (!review) {
+      return res.status(404).send('Review not found');
+    }
+
+    // Check if the current user is the one who posted the review
+    if (req.session.currentUser._id !== review.user.toString()) {
+      return res.status(403).send('You are not authorized to edit this review');
+    }
+
+    review.rating = rating;
+    review.comment = comment;
+    await review.save();
+
+    res.status(200).json(review);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send('Internal server error');
+  }
+});
+
 
 
 

@@ -79,32 +79,55 @@ router.post('/delete-book', isLoggedIn, async (req, res) => {
 });
 
 
+// router.post('/add-review', isLoggedIn, async (req, res) => {
+//   console.log("Review submission received:", req.body);
+//   try {
+//     const { rating, comment, volumeId } = req.body;
+//     const book = await Book.findOne({ volumeId });
+//     //const userId = req.session.currentUser._id;
+
+//     if (!book) {
+//       return res.status(404).send('Book not found');
+//     }
+
+//     const review = new Review({
+//       book: book._id,
+//       user: req.session.currentUser._id,
+//       rating,
+//       comment
+//     });
+//     await review.save();
+
+//     book.reviews.push(review._id); //update the book with the new review
+//     await book.save();
+//     res.status(200).json(review);
+    
+//   } catch (error) {
+//     console.log(error)
+//     res.status(500).send('internal server error', error)
+//   }
+// });
+
+
 router.post('/add-review', isLoggedIn, async (req, res) => {
-  console.log("Review submission received:", req.body);
   try {
     const { rating, comment, volumeId } = req.body;
-    const book = await Book.findOne({ volumeId });
-    //const userId = req.session.currentUser._id;
-
-    if (!book) {
-      return res.status(404).send('Book not found');
-    }
 
     const review = new Review({
-      book: book._id,
+      volumeId,
       user: req.session.currentUser._id,
       rating,
       comment
     });
     await review.save();
 
-    book.reviews.push(review._id); //update the book with the new review
-    await book.save();
+    // book.reviews.push(review._id); // Update the book with the new review
+    // await book.save();
     res.status(200).json(review);
-    
+
   } catch (error) {
-    console.log(error)
-    res.status(500).send('internal server error', error)
+    console.error('Error submitting review:', error);
+    res.status(500).send('Internal server error');
   }
 });
 
@@ -112,79 +135,75 @@ router.post('/add-review', isLoggedIn, async (req, res) => {
 router.get('/get-reviews/:volumeId', isLoggedIn, async (req, res) => {
   try {
     const { volumeId } = req.params;
-    const book = await Book.findOne({ volumeId }).populate({
-      path: 'reviews',
-      populate: { path: 'user' } // Populate user data in each review
-  });
-    if(!book) {
-      return res.status(404).send('Book not found')
-    }
-
-    if (book.reviews.length === 0) {
+    const reviews = await Review.find({ volumeId }).populate('user');
+    
+    if (reviews.length === 0) {
       return res.status(200).json({ message: "No reviews yet." });
     }
 
-
-    res.json(book.reviews);
+    res.json(reviews);
   } catch (error) {
-    res.status(500).send('internal server error', error)
-  }
-});
-
-router.delete('/delete-review/:reviewId', isLoggedIn, async (req, res) => {
-  try {
-    const { reviewId } = req.params;
-    const review = await Review.findById(reviewId);
-
-    if (!review) {
-      return res.status(404).send('Review not found');
-    }
-
-    // Check if the current user is the one who posted the review
-    if (req.session.currentUser._id !== review.user.toString()) { // converting the objectId in Mongo to a string to compare with the _id of the session which is a string
-      return res.status(403).send('You are not authorized to delete this review');
-    }
-
-    await Review.findByIdAndRemove(reviewId);
-
-    // Also, remove the review reference from the book
-    const book = await Book.findById(review.book);
-    book.reviews.pull(reviewId);
-    await book.save();
-
-    res.status(200).send('Review deleted successfully');
-  } catch (error) {
-    console.log(error);
+    console.error('Error fetching reviews:', error);
     res.status(500).send('Internal server error');
   }
 });
 
 
-router.put('/edit-review/:reviewId', isLoggedIn, async (req, res) => {
-  try {
-    const { reviewId } = req.params;
-    const { rating, comment } = req.body;
-    const review = await Review.findById(reviewId);
+// router.delete('/delete-review/:reviewId', isLoggedIn, async (req, res) => {
+//   try {
+//     const { reviewId } = req.params;
+//     const review = await Review.findById(reviewId);
 
-    if (!review) {
-      return res.status(404).send('Review not found');
-    }
+//     if (!review) {
+//       return res.status(404).send('Review not found');
+//     }
 
-    // Check if the current user is the one who posted the review
-    if (req.session.currentUser._id !== review.user.toString()) {
-      return res.status(403).send('You are not authorized to edit this review');
-    }
+//     // Check if the current user is the one who posted the review
+//     if (req.session.currentUser._id !== review.user.toString()) { // converting the objectId in Mongo to a string to compare with the _id of the session which is a string
+//       return res.status(403).send('You are not authorized to delete this review');
+//     }
 
-    review.rating = rating;
-    review.comment = comment;
-    await review.save();
+//     await Review.findByIdAndRemove(reviewId);
 
-    res.status(200).json(review);
-  } catch (error) {
-    console.log(error);
-    res.status(500).send('Internal server error');
-  }
-});
+//     // Also, remove the review reference from the book
+//     const book = await Book.findById(review.book);
+//     book.reviews.pull(reviewId);
+//     await book.save();
+
+//     res.status(200).send('Review deleted successfully');
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).send('Internal server error');
+//   }
+// });
+
+
+// router.put('/edit-review/:reviewId', isLoggedIn, async (req, res) => {
+//   try {
+//     const { reviewId } = req.params;
+//     const { rating, comment } = req.body;
+//     const review = await Review.findById(reviewId);
+
+//     if (!review) {
+//       return res.status(404).send('Review not found');
+//     }
+
+//     // Check if the current user is the one who posted the review
+//     if (req.session.currentUser._id !== review.user.toString()) {
+//       return res.status(403).send('You are not authorized to edit this review');
+//     }
+
+//     review.rating = rating;
+//     review.comment = comment;
+//     await review.save();
+
+//     res.status(200).json(review);
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).send('Internal server error');
+//   }
+// });
+
 
 
 

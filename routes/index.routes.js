@@ -149,33 +149,35 @@ router.get('/get-reviews/:volumeId', isLoggedIn, async (req, res) => {
 });
 
 
-// router.delete('/delete-review/:reviewId', isLoggedIn, async (req, res) => {
-//   try {
-//     const { reviewId } = req.params;
-//     const review = await Review.findById(reviewId);
+router.delete('/delete-review/:reviewId', isLoggedIn, async (req, res) => {
+  try {
+    const { reviewId } = req.params;
+    const review = await Review.findById(reviewId);
 
-//     if (!review) {
-//       return res.status(404).send('Review not found');
-//     }
+    if (!review) {
+      return res.status(404).json({ message: 'Review not found' });
+    }
 
-//     // Check if the current user is the one who posted the review
-//     if (req.session.currentUser._id !== review.user.toString()) { // converting the objectId in Mongo to a string to compare with the _id of the session which is a string
-//       return res.status(403).send('You are not authorized to delete this review');
-//     }
+    // Check if the current user is the one who posted the review
+    if (req.session.currentUser._id !== review.user.toString()) { // converting the objectId in Mongo to a string to compare with the _id of the session which is a string
+      return res.status(403).json({ message: 'You are not authorized to delete this review' });
+    }
 
-//     await Review.findByIdAndRemove(reviewId);
+    await Review.findByIdAndRemove(reviewId);
 
-//     // Also, remove the review reference from the book
-//     const book = await Book.findById(review.book);
-//     book.reviews.pull(reviewId);
-//     await book.save();
+    // Also, remove the review reference from the book
+    const book = await Book.findById(review.volumeId);
+    if (book) {
+      book.reviews.pull(reviewId);
+      await book.save();
+    }
 
-//     res.status(200).send('Review deleted successfully');
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).send('Internal server error');
-//   }
-// });
+    res.status(200).json({ message: 'Review deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting review:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
 
 
 // router.put('/edit-review/:reviewId', isLoggedIn, async (req, res) => {

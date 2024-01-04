@@ -180,31 +180,31 @@ router.delete('/delete-review/:reviewId', isLoggedIn, async (req, res) => {
 });
 
 
-// router.put('/edit-review/:reviewId', isLoggedIn, async (req, res) => {
-//   try {
-//     const { reviewId } = req.params;
-//     const { rating, comment } = req.body;
-//     const review = await Review.findById(reviewId);
+router.put('/edit-review/:reviewId', isLoggedIn, async (req, res) => {
+  try {
+    const { reviewId } = req.params;
+    const { rating, comment } = req.body;
+    const review = await Review.findById(reviewId);
 
-//     if (!review) {
-//       return res.status(404).send('Review not found');
-//     }
+    if (!review) {
+      return res.status(404).json({ message: 'Review not found' });
+    }
 
-//     // Check if the current user is the one who posted the review
-//     if (req.session.currentUser._id !== review.user.toString()) {
-//       return res.status(403).send('You are not authorized to edit this review');
-//     }
+    // Check if the current user is the one who posted the review
+    if (req.session.currentUser._id !== review.user.toString()) {
+      return res.status(403).json({ message: 'You are not authorized to edit this review' });
+    }
 
-//     review.rating = rating;
-//     review.comment = comment;
-//     await review.save();
+    review.rating = rating;
+    review.comment = comment;
+    await review.save();
 
-//     res.status(200).json(review);
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).send('Internal server error');
-//   }
-// });
+    res.status(200).json(review);
+  } catch (error) {
+    console.error('Error editing review:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
 
 
 

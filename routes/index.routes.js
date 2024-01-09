@@ -135,7 +135,7 @@ router.post('/add-review', isLoggedIn, async (req, res) => {
 router.get('/get-reviews/:volumeId', isLoggedIn, async (req, res) => {
   try {
     const { volumeId } = req.params;
-    const reviews = await Review.find({ volumeId }).populate('user');
+    const reviews = await Review.find({ volumeId }).populate('user', 'name _id');
     
     if (reviews.length === 0) {
       return res.status(200).json({ message: "No reviews yet." });
@@ -157,6 +157,8 @@ router.delete('/delete-review/:reviewId', isLoggedIn, async (req, res) => {
     if (!review) {
       return res.status(404).json({ message: 'Review not found' });
     }
+
+    console.log("Review User:", review.user);
 
     // Check if the current user is the one who posted the review
     if (req.session.currentUser._id !== review.user.toString()) { // converting the objectId in Mongo to a string to compare with the _id of the session which is a string

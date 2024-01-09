@@ -92,5 +92,13 @@ router.post('/signup', isLoggedOut, (req, res, next) => {
             res.send('User is loggged out')
         });
     });
+
+
+    router.get('/current-user', isLoggedIn, (req, res) => {
+        const user = {
+            id: req.session.currentUser._id,
+        };
+        res.status(200).json({ currentUser: user });
+    });
       
 module.exports = router;

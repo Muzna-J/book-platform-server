@@ -97,6 +97,7 @@ router.post('/signup', isLoggedOut, (req, res, next) => {
     router.get('/current-user', isLoggedIn, (req, res) => {
         const user = {
             id: req.session.currentUser._id,
+            name: req.session.currentUser.name,
         };
         res.status(200).json({ currentUser: user });
     });

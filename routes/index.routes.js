@@ -120,13 +120,15 @@ router.post('/add-review', isLoggedIn, async (req, res) => {
       comment
     });
     await review.save();
+    console.log('Review saved successfully');
 
     // book.reviews.push(review._id); // Update the book with the new review
     // await book.save();
     res.status(200).json(review);
 
   } catch (error) {
-    console.error('Error submitting review:', error);
+    //console.error('Error submitting review:', error);
+    console.log('Entered catch block', error);
     res.status(500).send('Internal server error');
   }
 });

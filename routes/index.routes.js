@@ -112,6 +112,11 @@ router.post('/delete-book', isLoggedIn, async (req, res) => {
 router.post('/add-review', isLoggedIn, async (req, res) => {
   try {
     const { rating, comment, volumeId } = req.body;
+    const existingReview = await Review.findOne({user: req.session.currentUser._id, volumeId});
+
+    if (existingReview) {
+      return res.status(400).json({message: 'You have already reviewed this book'})
+    }
 
     const review = new Review({
       volumeId,

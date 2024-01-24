@@ -112,6 +112,9 @@ router.post('/delete-book', isLoggedIn, async (req, res) => {
 router.post('/add-review', isLoggedIn, async (req, res) => {
   try {
     const { rating, comment, volumeId } = req.body;
+    if (!rating || rating === 0 || !comment.trim()) {
+      return res.status(400).json({ message: 'Both rating and comment are required.' });
+    }
     const existingReview = await Review.findOne({user: req.session.currentUser._id, volumeId});
 
     if (existingReview) {

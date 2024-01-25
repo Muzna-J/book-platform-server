@@ -142,7 +142,7 @@ router.post('/add-review', isLoggedIn, async (req, res) => {
 });
 
 
-router.get('/get-reviews/:volumeId', isLoggedIn, async (req, res) => {
+router.get('/get-reviews/:volumeId', async (req, res) => {
   try {
     const { volumeId } = req.params;
     const reviews = await Review.find({ volumeId }).populate('user', 'name _id');

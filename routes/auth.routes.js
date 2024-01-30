@@ -62,21 +62,19 @@ router.post('/signup', isLoggedOut, (req, res, next) => {
         const { email, password } = req.body;
 
         if(email === '' || password === '') {
-            res.send({errorMessage: 'Please enter both email and password to login'});
+            res.status(400).send({errorMessage: 'Please enter both email and password to login'});
             return
         }
 
         User.findOne({email})
         .then(user => {
-            if(!user) {
-                res.send({errorMessage: 'Email is not registered. Try with another email.'});
+            if(!user || !bcryptjs.compareSync(password, user.passwordHash)) {
+                res.status(401).send({errorMessage: 'Invalid email or password'});
                 return;
-            } else if(bcryptjs.compareSync(password, user.passwordHash)) {
+            } else {
                 req.session.currentUser = user;
                 res.status(200).json({ message: 'Login successful' }); 
-            } else {
-                res.send({errorMessage: 'Incorrect password'})
-            }
+            } 
         }) 
         .catch(error => next(error))
 
@@ -98,8 +96,44 @@ router.post('/signup', isLoggedOut, (req, res, next) => {
         const user = {
             id: req.session.currentUser._id,
             name: req.session.currentUser.name,
+            email: req.session.currentUser.email,
         };
         res.status(200).json({ currentUser: user });
     });
+
+    router.put('/update-profile', isLoggedIn, async (req, res, next) => {
+        const userId = req.session.currentUser._id;
+        const { name, password } = req.body;
+    
+        try {
+            // Construct the update object
+            const updateData = {};
+            if (name) updateData.name = name;
+    
+            if (password) {
+                // Validate the new password
+                if (!passwordValidator(password)) {
+                    return res.status(400).send({
+                        error: 'Password must have a minimum of 8 characters, including at least one number, one lowercase letter, one uppercase letter, and one special character'
+                    });
+                }
+                // Hash the new password
+                const hashedPassword = await bcryptjs.hash(password, saltRounds);
+                updateData.passwordHash = hashedPassword;
+            }
+    
+            // Update the user in the database
+            const updatedUser = await User.findByIdAndUpdate(userId, updateData, { new: true });
+            req.session.currentUser = updatedUser; //updating the user data in the session
+            res.status(200).json({ message: 'User updated successfully', currentUser: updatedUser });
+        } catch (error) {
+            if (error instanceof mongoose.Error.ValidationError) {
+                res.status(500).send({ errorMessage: error.message });
+            } else {
+                next(error);
+            }
+        }
+    });
+    
       
 module.exports = router;

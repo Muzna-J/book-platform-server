@@ -125,7 +125,7 @@ router.post('/signup', isLoggedOut, (req, res, next) => {
             // Update the user in the database
             const updatedUser = await User.findByIdAndUpdate(userId, updateData, { new: true });
             req.session.currentUser = updatedUser; //updating the user data in the session
-            res.status(200).json({ message: 'User updated successfully', currentUser: updatedUser });
+            res.status(200).json({ message: 'Profile updated successfully', currentUser: updatedUser });
         } catch (error) {
             if (error instanceof mongoose.Error.ValidationError) {
                 res.status(500).send({ errorMessage: error.message });

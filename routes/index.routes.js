@@ -26,14 +26,14 @@ router.post('/reading-list/add', isLoggedIn, async(req, res) => {
       return res.status(401).json({ message: 'Not authenticated' });
     }
   
-    // First, create a new Book document or find an existing one
+    // Create a new Book document or find an existing one
     let book = await Book.findOne({ volumeId });
     if (!book) {
       book = new Book({ volumeId, title, thumbnail });
       await book.save();
     }
 
-    // Then, add the book's ObjectId to the user's reading list
+    // Add the book's ObjectId to the user's reading list
     await User.findByIdAndUpdate(req.session.currentUser._id, {
       $addToSet: { readingList: book._id }
     });
@@ -43,24 +43,6 @@ router.post('/reading-list/add', isLoggedIn, async(req, res) => {
     res.status(500).json({ message: 'Internal server error', error: process.env.NODE_ENV === 'development' ? error : undefined });
   }
 });
-
-
-// router.post('/reading-list/add', async(req, res) => {
-//   try {
-//     const { volumeId } = req.body;
-//     if (!req.session.currentUser) {
-//       return res.status(401).json({ message: 'Not authenticated' });
-//     }
-  
-//     await User.findByIdAndUpdate(req.session.currentUser._id, {
-//       $addToSet: { readingList: volumeId }
-//     });
-
-//     res.json({ message: 'Book added to reading list' });
-//   } catch (error) {
-//     res.status(500).json({ message: 'Internal server error', error: process.env.NODE_ENV === 'development' ? error : undefined });
-//   }
-// });
 
 
 router.post('/delete-book', isLoggedIn, async (req, res) => {
@@ -77,36 +59,6 @@ router.post('/delete-book', isLoggedIn, async (req, res) => {
     res.status(500).send('internal server error', error);
   }
 });
-
-
-// router.post('/add-review', isLoggedIn, async (req, res) => {
-//   console.log("Review submission received:", req.body);
-//   try {
-//     const { rating, comment, volumeId } = req.body;
-//     const book = await Book.findOne({ volumeId });
-//     //const userId = req.session.currentUser._id;
-
-//     if (!book) {
-//       return res.status(404).send('Book not found');
-//     }
-
-//     const review = new Review({
-//       book: book._id,
-//       user: req.session.currentUser._id,
-//       rating,
-//       comment
-//     });
-//     await review.save();
-
-//     book.reviews.push(review._id); //update the book with the new review
-//     await book.save();
-//     res.status(200).json(review);
-    
-//   } catch (error) {
-//     console.log(error)
-//     res.status(500).send('internal server error', error)
-//   }
-// });
 
 
 router.post('/add-review', isLoggedIn, async (req, res) => {
@@ -129,9 +81,6 @@ router.post('/add-review', isLoggedIn, async (req, res) => {
     });
     await review.save();
     console.log('Review saved successfully');
-
-    // book.reviews.push(review._id); // Update the book with the new review
-    // await book.save();
     res.status(200).json(review);
 
   } catch (error) {

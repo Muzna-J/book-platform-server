@@ -40,7 +40,6 @@ router.post('/signup', isLoggedOut, (req, res, next) => {
         });
       })
       .then(userFromDB => {
-        console.log('Newly created user is: ', userFromDB);
         res.status(201).json({message: 'User registered successfully', user: userFromDB})
         res.redirect('/profile')
         

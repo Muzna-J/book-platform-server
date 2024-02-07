@@ -39,7 +39,6 @@ app.get('/books' , async (req, res) => {
 
 
 app.get('/book/:volumeId', async(req, res) => {
-    console.log("Fetching book details for volumeId:", req.params.volumeId);
     const volumeId = req.params.volumeId;
 
     if(!volumeId) {

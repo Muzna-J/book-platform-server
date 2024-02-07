@@ -46,7 +46,6 @@ router.post('/reading-list/add', isLoggedIn, async(req, res) => {
 
 
 router.post('/delete-book', isLoggedIn, async (req, res) => {
-  console.log("Delete request received:", req.body);
   try {
     const { volumeId } = req.body;
     const book = await Book.findOne({ volumeId });
@@ -55,7 +54,6 @@ router.post('/delete-book', isLoggedIn, async (req, res) => {
     });
     res.send('Book removed from reading list')
   } catch (error) {
-    console.log(error);
     res.status(500).send('internal server error', error);
   }
 });
@@ -80,12 +78,9 @@ router.post('/add-review', isLoggedIn, async (req, res) => {
       comment
     });
     await review.save();
-    console.log('Review saved successfully');
     res.status(200).json(review);
 
   } catch (error) {
-    //console.error('Error submitting review:', error);
-    console.log('Entered catch block', error);
     res.status(500).send('Internal server error');
   }
 });
@@ -117,8 +112,6 @@ router.delete('/delete-review/:reviewId', isLoggedIn, async (req, res) => {
       return res.status(404).json({ message: 'Review not found' });
     }
 
-    console.log("Review User:", review.user);
-
     // Check if the current user is the one who posted the review
     if (req.session.currentUser._id !== review.user.toString()) { // converting the objectId in Mongo to a string to compare with the _id of the session which is a string
       return res.status(403).json({ message: 'You are not authorized to delete this review' });
@@ -126,7 +119,7 @@ router.delete('/delete-review/:reviewId', isLoggedIn, async (req, res) => {
 
     await Review.findByIdAndRemove(reviewId);
 
-    // Also, remove the review reference from the book
+    // Remove the review reference from the book
     const book = await Book.findById(review.volumeId);
     if (book) {
       book.reviews.pull(reviewId);
@@ -140,7 +133,7 @@ router.delete('/delete-review/:reviewId', isLoggedIn, async (req, res) => {
   }
 });
 
-
+ 
 router.put('/edit-review/:reviewId', isLoggedIn, async (req, res) => {
   try {
     const { reviewId } = req.params;

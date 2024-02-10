@@ -4,24 +4,7 @@ const express = require("express");
 const app = express();
 require("./config")(app);
 require('./config/session.config')(app); //the app getting passed here is the express app defined above
-const { getBooks, getBookDetails } = require('../server/api/googleBooksAPI')
-
-const path = require('path');
-const buildPath = path.join(__dirname, "../client/build");
-
-app.use (express.static(buildPath))
-
-app.get("/*", function(req, res) {
-    res.sendFile(
-        path.join(__dirname, "../client/build/index.html"),
-        function (err) {
-            if(err) {
-                res.status(500).send(err);
-            }
-        }
-    )
-})
-
+const { getBooks, getBookDetails } = require('../book-platform-server/api/googleBooksAPI')
 
 
 // 👇 Start handling routes here

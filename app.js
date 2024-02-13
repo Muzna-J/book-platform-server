@@ -4,7 +4,7 @@ const express = require("express");
 const app = express();
 require("./config")(app);
 require('./config/session.config')(app); //the app getting passed here is the express app defined above
-const { getBooks, getBookDetails } = require('../book-platform-server/api/googleBooksAPI')
+const { getBooks, getBookDetails } = require('../book-platform-server/api/googleBooksAPI');
 
 
 
